@@ -4,7 +4,7 @@
 
 **Tasks**:
 
- - [ ] Create Architecture
+ - [X] Create Architecture
  - [ ] Write Python Script
 	 - [ ] Fetch Data
 	 - [ ] Clean Up Data Set
@@ -19,3 +19,6 @@
 	 - [ ] SNS
 	 - [ ] QuickSight (Dashboard)
  - [ ] Write a blog
+
+**Initial Architecture**
+![alt text](EventDrivenChallenge.png)
