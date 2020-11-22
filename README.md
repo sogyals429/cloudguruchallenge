@@ -6,8 +6,8 @@
 
  - [X] Create Architecture
  - [ ] Write Python Script
-	 - [ ] Fetch Data
-	 - [ ] Clean Up Data Set
+	 - [X] Fetch Data
+	 - [X] Clean Up Data Set
 	 - [ ] Modify Data Set to show recovered cases.
 	 - [ ] Filter Data
 	 - [ ] Code Cleanup
