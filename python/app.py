@@ -12,9 +12,12 @@ def fetchData(url):
 
 def parseData(url):
   data = fetchData(url)
-  f = open('tmp.csv','w+')
-  f.write(data)
-  f.close()
+  try: 
+    f = open('tmp.csv','w+')
+    f.write(data)
+    f.close()
+  except Exception as e:
+    print("Failed to write data " + str(e))
 
 def cleanData():
   try:
@@ -26,7 +29,7 @@ def cleanData():
       # formatData()
       print(cases)
   except Exception as e: 
-    print("Exception occured file " + str(e))
+    print("Exception occured while formatting data " + str(e))
 
 def formatData():
   url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv"
