@@ -5,9 +5,10 @@ from datetime import datetime
 
 def fetchData(url):
   data = requests.get(url)
-  saveTempFile(data.text)
+  return data.text
 
-def saveTempFile(data):
+def saveTempFile(url):
+  data = fetchData(url)
   f = open('tmp.csv','w+')
   f.write(data)
   f.close()
@@ -20,8 +21,14 @@ def cleanData():
     for line in reader:
       line["date"] = datetime.strptime(line["date"],'%Y-%m-%d').date()
       cases.append(line)
+      # formatData()
+      print(cases)
   except Exception as e: 
     print("Exception occured file " + str(e))
 
+def formatData():
+  url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv"
+  saveTempFile(url)
+
 if __name__ == "__main__":
-  fetchData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
+  saveTempFile("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
