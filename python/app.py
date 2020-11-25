@@ -5,14 +5,16 @@ from datetime import datetime
 
 def fetchData(url):
   data = requests.get(url)
-  return data.text
+  if data.status_code == 200:
+    return data.text
+  else:
+    raise Exception()
 
-def saveTempFile(url):
+def parseData(url):
   data = fetchData(url)
   f = open('tmp.csv','w+')
   f.write(data)
   f.close()
-  cleanData()
 
 def cleanData():
   try:
@@ -28,7 +30,11 @@ def cleanData():
 
 def formatData():
   url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv"
-  saveTempFile(url)
+  parseData(url)
 
 if __name__ == "__main__":
-  saveTempFile("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
+  try :
+    parseData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
+    cleanData()
+  except Exception as e:
+    print("An error occured while fetching data")
