@@ -1,35 +1,39 @@
-import requests
+import urllib3
+import json
 import csv
 from datetime import datetime
 
+rawCases = []
 
 def fetchData(url):
-  data = requests.get(url)
-  if data.status_code == 200:
-    return data.text
+  http = urllib3.PoolManager()
+  request = http.request('GET', url)
+  if request.status == 200:
+    return request.data.decode('utf-8')
   else:
     raise Exception()
 
 def parseData(url):
-  data = fetchData(url)
   try: 
-    f = open('tmp.csv','w+')
-    f.write(data)
-    f.close()
+    data = fetchData(url)
+    reader = csv.DictReader(data.split("\n"), delimiter=',')
+    for row in reader:
+      rawCases.append(row)
   except Exception as e:
-    print("Failed to write data " + str(e))
+    print("Failed to parse data from url " + str(e))
 
 def cleanData():
   try:
-    reader = csv.DictReader(open('tmp.csv','r'))
-    cases = []
-    for line in reader:
-      line["date"] = datetime.strptime(line["date"],'%Y-%m-%d').date()
-      cases.append(line)
-      # formatData()
-      print(cases)
+    cleanedData = parseDate(rawCases)
   except Exception as e: 
     print("Exception occured while formatting data " + str(e))
+
+def parseDate(csvData):
+  cases = []
+  for line in csvData:
+    line["date"] = datetime.strptime(line["date"],'%Y-%m-%d').date()
+    cases.append(line)
+  return cases
 
 def formatData():
   url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv"
@@ -40,4 +44,4 @@ if __name__ == "__main__":
     parseData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
     cleanData()
   except Exception as e:
-    print("An error occured while fetching data")
+    print("An error occured while fetching data" + str(e))
