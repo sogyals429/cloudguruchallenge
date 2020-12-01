@@ -8,8 +8,8 @@
  - [ ] Write Python Script
 	 - [X] Fetch Data
 	 - [X] Clean Up Data Set
-	 - [ ] Modify Data Set to show recovered cases.
-	 - [ ] Filter Data
+	 - [X] Modify Data Set to show recovered cases.
+	 - [X] Filter Data
 	 - [ ] Code Cleanup
 	 - [ ] Tests
  - [ ] Setup Infrastructure
