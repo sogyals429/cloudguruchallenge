@@ -2,25 +2,35 @@ import urllib3
 import json
 import csv
 from datetime import datetime
+import logging
+
+logging.basicConfig(level=logging.INFO,format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', datefmt='%d-%m-%Y %I:%M:%S %p')
+log = logging.getLogger("app")
 
 def fetchData(url):
-  http = urllib3.PoolManager()
-  request = http.request('GET', url)
-  if request.status == 200:
-    return request.data.decode('utf-8')
-  else:
-    raise Exception()
+  try:
+    http = urllib3.PoolManager()
+    request = http.request('GET', url)
+    if request.status == 200:
+      logDebug(request.data.decode('utf-8'))
+      log.info('Fetching Data from %s', url)
+      return request.data.decode('utf-8')
+    else:
+      log.error('Website not available: ' + request.status)
+  except Exception as e:
+    log.error('Failed to fetch data',exc_info=True)
 
 def parseData(url):
-  rawCases = []
+  data = fetchData(url)
   try: 
-    data = fetchData(url)
+    rawCases = []
     reader = csv.DictReader(data.split("\n"), delimiter=',')
     for row in reader:
       rawCases.append(row)
+    logging.debug("Cases fetched and appended to array")
     return rawCases
   except Exception as e:
-    print("Failed to parse data from url " + str(e))
+    logging.error("Failed to parse data from url " + str(e),exc_info=True)
 
 def cleanData(rawCases):
   try:
@@ -52,20 +62,24 @@ def formatData(originalCases):
     for johnCase in usCases:
       if case["date"] == johnCase["Date"]:
         case["Recovered"] = johnCase["Recovered"]
-        print(case)
-  
+  return originalCases
 
 def filterData(cases):
-  rawCases = []
-  for case in cases:
-    if case["Country/Region"] == "US":
-      rawCases.append(case)
-  return rawCases
+  try:
+    rawCases = []
+    for case in cases:
+      if case["Country/Region"] == "US":
+        rawCases.append(case)
+    return rawCases
+  except Exception as e:
+    print("Exception")
+
+
+def logDebug(message):
+  logging.debug(message)
 
 if __name__ == "__main__":
-  try :
-    nyTimesCases = parseData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
-    cleanedDataNy = cleanData(nyTimesCases)
-    formatData(cleanedDataNy)
-  except Exception as e:
-    print("An error occured while fetching data " + str(e))
+  # nyTimesCases = parseData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
+  nyTimesCases = parseData("localhost")
+  cleanedDataNy = cleanData(nyTimesCases)
+  formatData(cleanedDataNy)
