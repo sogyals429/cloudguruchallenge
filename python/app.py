@@ -1,5 +1,4 @@
-import urllib3
-import json
+import requests
 import csv
 from datetime import datetime
 import logging
@@ -7,46 +6,35 @@ import logging
 logging.basicConfig(level=logging.INFO,format='%(asctime)s:%(name)s:%(levelname)s:%(message)s', datefmt='%d-%m-%Y %I:%M:%S %p')
 log = logging.getLogger("app")
 
-rawCases = []
 
 def fetchData(url):
-  try:
-    http = urllib3.PoolManager()
-    request = http.request('GET', url)
-    if request.status == 200:
-      logDebug(request.data.decode('utf-8'))
-      log.info('Fetching Data from %s', url)
-      return request.data.decode('utf-8')
-    else:
-      log.error('Website not available: ' + request.status)
-  except Exception as e:
-    log.error('Failed to fetch data',exc_info=True)
+  data = requests.get(url)
+  if data.status_code == 200:
+    return data.text
+  else:
+    raise Exception()
 
 def parseData(url):
-    for row in reader:
-      rawCases.append(row)
-  except Exception as e:
-    logging.error("Failed to parse data from url " + str(e),exc_info=True)
-
+  data = fetchData(url)
+  f = open('tmp.csv','w+')
+  f.write(data)
+  f.close()
+  
 def cleanData():
-  try:
-    cleanedData = parseDate(rawCases)
-  except Exception as e: 
-    print("Exception occured while formatting data " + str(e))
-
-def parseDate(csvData):
+  reader = csv.DictReader(open('tmp.csv','r'))
   cases = []
-  for line in csvData:
+  for line in reader:
     line["date"] = datetime.strptime(line["date"],'%Y-%m-%d').date()
     cases.append(line)
-  return cases
+    # formatData()
+    print(cases)
 
 def formatData():
   url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv"
   cases = parseData(url)
   usCases = cleanData(filterData(cases))
 
-    parseData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
-    cleanData()
-  except Exception as e:
-    print("An error occured while fetching data" + str(e))
+
+if __name__ == "__main__":
+  parseData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
+  cleanData()
