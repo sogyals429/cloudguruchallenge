@@ -12,29 +12,42 @@ def fetchData(url):
   if data.status_code == 200:
     return data.text
   else:
-    raise Exception()
+    return data.text
 
 def parseData(url):
   data = fetchData(url)
-  f = open('tmp.csv','w+')
-  f.write(data)
-  f.close()
-  
-def cleanData():
-  reader = csv.DictReader(open('tmp.csv','r'))
+  rawCases = []
+  reader = csv.DictReader(data.split("\n"), delimiter=',')
+  for row in reader:
+    rawCases.append(row)
+  return rawCases
+
+def parseDate(data):
   cases = []
-  for line in reader:
+  for line in data:
     line["date"] = datetime.strptime(line["date"],'%Y-%m-%d').date()
     cases.append(line)
-    # formatData()
-    print(cases)
+  return cases
 
-def formatData():
-  url = "https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv"
-  cases = parseData(url)
-  usCases = cleanData(filterData(cases))
+def joinData(cases):
+  tempCases = []
+  for johnCase in cases:
+    if johnCase["Country/Region"] == "US":    
+      tempCases.append(johnCase)
+  return tempCases
+
+def filterData(nyCases,johnHopkins):
+  for case in nyCases:
+    for johnCase in johnHopkins:
+      if str(case["date"].strftime('%Y-%m-%d')) == johnCase["Date"]:
+        case["Recovered"] = johnCase["Recovered"]
+  return nyCases
+
 
 
 if __name__ == "__main__":
-  parseData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
-  cleanData()
+  cases = parseData("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
+  nyCases = parseDate(cases)
+  johnHopkins = parseData("https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv")
+  data = joinData(johnHopkins)
+  print(filterData(nyCases,johnHopkins))
