@@ -1,4 +1,4 @@
-import requests
+import urllib3
 import csv
 from datetime import datetime
 import logging
@@ -8,11 +8,12 @@ log = logging.getLogger("app")
 
 
 def fetchData(url):
-  data = requests.get(url)
-  if data.status_code == 200:
-    return data.text
+  http = urllib3.PoolManager()
+  request = http.request('GET', url)
+  if request.status == 200:
+    return request.data.decode('utf-8')
   else:
-    return data.text
+    return request.status
 
 def parseData(url):
   data = fetchData(url)
